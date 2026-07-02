@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agent-builder"
+version = "{MODULE_VERSION_VAR}"
+description = "Agent Orchestration Made Easy - Build, compose, and invoke custom AI Agents"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Kapil Sharma", email = "kapil.sharma@sprinklr.com"},
+    {name = "Raghav Garg", email = "raghav.garg@sprinklr.com"},
+    {name = "Karan Gupta", email = "karan.gupta1@sprinklr.com"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Operating System :: OS Independent",
+]
+keywords = ["ai", "agent", "langchain", "langgraph", "orchestration"]
+requires-python = ">=3.8"
+dynamic = ["dependencies"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[project.urls]
+Homepage = "https://prod-gitlab.sprinklr.com/sprinklr/machine-learning/agent_builder"
+
+[tool.setuptools.packages.find]
+include = ["agent_builder", "agent_builder.*"]
+
+[tool.setuptools.package-data]
+"agent_builder" = ["*.py", "**/*.py", "**/*.yaml", "**/*.json", "**/*.txt"] 

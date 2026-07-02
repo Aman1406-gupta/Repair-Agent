@@ -1,0 +1,65 @@
+# GitLab CI/CD Configuration for Agent Builder
+# Runs tests on every push and merge request
+
+stages:
+  - test
+
+# Define variables
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+
+# Cache pip packages
+cache:
+  paths:
+    - .cache/pip
+
+
+.test_template:
+  stage: test
+  image: prod-nexus.sprinklr.com:8123/intuition/intuition_base_amd_any_py311:1.0
+  before_script:
+    - python --version
+    - pip install --upgrade pip
+    # Install dependencies from sdk/requirements.txt (includes llm_router from internal repo)
+    - pip install --extra-index-url https://repouser:5fPtTY7OAaUd@prod-nexus.sprinklr.com/nexus/repository/spypi/simple/ --use-deprecated=legacy-resolver -r sdk/requirements.txt
+    # Install test dependencies
+    - pip install pytest pytest-asyncio pytest-mock anyio
+    # Prepare agent_builder package structure (mimics build.sh)
+    - mkdir -p sdk/agent_builder/
+    - cp -r base prebuilt_tasks utils llm_client tests sdk/agent_builder/
+    - touch sdk/agent_builder/__init__.py
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "push"
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH
+
+# Individual test jobs for each test file
+test:agent:
+  extends: .test_template
+  script:
+    - cd sdk && python -m pytest agent_builder/tests/test_agent.py -v --tb=short
+
+test:task:
+  extends: .test_template
+  script:
+    - cd sdk && python -m pytest agent_builder/tests/test_task.py -v --tb=short
+
+test:tools:
+  extends: .test_template
+  script:
+    - cd sdk && python -m pytest agent_builder/tests/test_tools.py -v --tb=short
+
+test:tools_mock:
+  extends: .test_template
+  script:
+    - cd sdk && python -m pytest agent_builder/tests/test_tools_mock.py -v --tb=short
+
+test:sprinklr_chat_model:
+  extends: .test_template
+  script:
+    - cd sdk && python -m pytest agent_builder/tests/test_sprinklr_chat_model.py -v --tb=short
+
+test:custom_state:
+  extends: .test_template
+  script:
+    - cd sdk && python -m pytest agent_builder/tests/test_custom_state.py -v --tb=short

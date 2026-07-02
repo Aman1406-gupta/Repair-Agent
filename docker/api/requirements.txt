@@ -1,0 +1,20 @@
+--index-url https://pypi.python.org/simple/ --extra-index-url https://repouser:5fPtTY7OAaUd@prod-nexus.sprinklr.com/nexus/repository/spypi/simple/
+
+aiohttp>=3.9.0,<4
+langgraph==1.2.0
+tornado==6.5.2
+nest_asyncio==1.6.0
+llm_router==1.2.8
+redis==6.4.0
+PyYAML>=6.0
+asgard_mongo_connector==1.0.0
+grpcio==1.74.0
+grpcio-tools==1.74.0
+protobuf>=4.25.8
+prometheus_client==0.23.1
+openai==2.9.0
+websockets==15.0.1
+ipython==9.8.0
+asgard==7.0.2
+langchain_mcp_adapters==0.2.2
+deepagents>=0.6.3
