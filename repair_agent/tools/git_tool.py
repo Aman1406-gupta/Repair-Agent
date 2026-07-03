@@ -38,7 +38,7 @@ class GitTool:
         """
         Stage all files and create a commit.
         """
-        self._run("git", "add", " " + file_path)
+        self._run("git", "add", file_path)
         self._run("git", "commit", "-m", commit_message)
 
     def push_branch(self, branch_name: str, remote: str = "origin"):

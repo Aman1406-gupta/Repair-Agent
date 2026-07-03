@@ -1,7 +1,7 @@
 REPAIR_GENERATION_PROMPT = """
 You are an expert Java software engineer.
 
-Your goal is to generate the exact replacement code for the identified line range.
+Your goal is to generate the minimal repair code for the given test code in identified line range.
 
 Inputs
 

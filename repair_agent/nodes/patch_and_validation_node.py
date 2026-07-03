@@ -69,6 +69,7 @@ class PatchAndValidationNode:
                 if updated_patch.methodName in failed_validations:
 
                     remove_patches.append(updated_patch)
+                    print(f"Repair not commited for" + updated_patch.methodName + "due to Validation failure")
 
             self.file_tool.remove_lines(
                 {
