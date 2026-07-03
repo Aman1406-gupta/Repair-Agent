@@ -16,7 +16,7 @@ class PatchAndValidationNode:
 
         for group in state["repair_groups"]:
 
-            self.git_tool.checkout_branch.invoke(group.branch_name)
+            self.git_tool.checkout_branch(group.branch_name)
 
             repair_patches: list[Patch] = []
             remove_patches: list[Patch] = []
@@ -36,7 +36,7 @@ class PatchAndValidationNode:
 
                 repair_patches.append(repair_patch)
 
-            updated_patches = self.file_tool.replace_lines.invoke(
+            updated_patches = self.file_tool.replace_lines(
                 {
                     "file_path": group.group_key,
                     "repair_patches": repair_patches,
@@ -47,7 +47,7 @@ class PatchAndValidationNode:
 
             for item in state["repair_items"]:
 
-                validation_result = await self.validation_tool.run_test.ainvoke(
+                validation_result = await self.validation_tool.run_test(
                     {
                         "class_name": item.test_document.className,
                         "method_name": item.test_document.methodName
@@ -70,13 +70,13 @@ class PatchAndValidationNode:
 
                     remove_patches.append(updated_patch)
 
-            self.file_tool.remove_lines.invoke(
+            self.file_tool.remove_lines(
                 {
                     "file_path": group.group_key,
                     "remove_patches": remove_patches
                 }
             )
 
-            self.git_tool.commit_all.invoke(group.commit_message, group.group_key)
+            self.git_tool.commit_all(group.commit_message, group.group_key)
 
         return state

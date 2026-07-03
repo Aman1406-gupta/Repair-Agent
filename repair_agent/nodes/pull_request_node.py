@@ -46,7 +46,7 @@ class PullRequestNode:
 
                 group.pr_description = pr_desc
 
-                pr_url = await self.github_tool.create_pull_request.ainvoke( # to check
+                pr_url = await self.github_tool.create_pull_request( # to check
                     {
                         "repository_url": group.repository_url,
                         "source_branch": group.branch_name,
@@ -83,7 +83,7 @@ class PullRequestNode:
 
                 group.pr_description = pr_desc
 
-                pr_url = await self.github_tool.create_pull_request.ainvoke(
+                pr_url = await self.github_tool.create_pull_request(
                     {
                         "repository_url": group.repository_url,
                         "source_branch": group.branch_name,

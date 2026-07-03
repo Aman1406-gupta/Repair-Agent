@@ -17,7 +17,7 @@ class RepairNode:
             if item.is_infrastructure or not item.is_reproducible or item.target_to_repair == "SERVICE":
                 continue
 
-            service_source = await self.github_tool.fetch_file.ainvoke(
+            service_source = await self.github_tool.fetch_file(
                 {
                     "repository_url": item.test_document.repositoryUrl,
                     "file_path": item.service_file_path,

@@ -74,6 +74,7 @@ class RepairAgent:
 
         pull_request = PullRequestNode(
             self.pull_request_task,
+            self.skeleton_pull_request_task,
             self.git_tool,
             self.github_tool,
         )

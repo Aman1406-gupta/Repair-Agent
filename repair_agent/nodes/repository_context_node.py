@@ -1,5 +1,3 @@
-import asyncio
-
 from repair_agent.models.repair_item import RepairItem
 from repair_agent.state import RepairState
 
@@ -27,7 +25,7 @@ class RepositoryContextNode:
             cache_key = (repo, current_commit, file_path)
 
             if cache_key not in diff_cache:
-                diff_cache[cache_key] = self.git_tool.pre_repair_git_diff.invoke(
+                diff_cache[cache_key] = self.git_tool.pre_repair_git_diff(
                     {
                         "current_commit_sha": current_commit,
                         "previous_commit_sha": current_commit + "~1",
@@ -35,7 +33,7 @@ class RepositoryContextNode:
                     }
                 )
 
-            test_source = await self.github_tool.fetch_file_lines.ainvoke(
+            test_source = await self.github_tool.fetch_file_lines(
                 {
                     "repository_url": repo,
                     "file_path": test_doc.testCaseFilePath,
