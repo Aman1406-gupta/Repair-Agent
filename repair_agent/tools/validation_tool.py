@@ -1,9 +1,6 @@
 import subprocess
 
-from langchain_core.tools import tool
-
-
-class GradleTool:
+class ValidationTool:
     """Wrapper around Gradle test execution."""
 
     @staticmethod
@@ -17,7 +14,6 @@ class GradleTool:
 
         return process.returncode == 0
 
-    @tool
     def run_test(self, test_class: str, test_method: str) -> bool:
         """
         Execute a single test method.

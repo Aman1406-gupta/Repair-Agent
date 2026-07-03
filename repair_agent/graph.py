@@ -1,42 +1,13 @@
 from langgraph.graph import StateGraph, START, END
-
 from repair_agent.state import RepairState
-
-
-def failure_router(state: RepairState):
-
-    if state["is_infrastructure"]:
-        return END
-
-    if not state["is_reproducible"]:
-        return END
-
-    return "repair_generation"
-
-
-def validation_router(state: RepairState):
-
-    if state["validation_passed"]:
-        return "pull_request"
-
-    if state["retry_count"] < state["max_retries"]:
-        return "retry"
-
-    return END
-
-
-def retry_node(state: RepairState):
-
-    state["retry_count"] += 1
-
-    return state
 
 
 def build_graph(
         repository_context_node,
         failure_analysis_node,
-        repair_generation_node,
-        validation_node,
+        repair_node,
+        grouping_node,
+        patch_and_validation_node,
         pull_request_node,
 ):
 
@@ -53,18 +24,18 @@ def build_graph(
     )
 
     builder.add_node(
-        "repair_generation",
-        repair_generation_node,
+        "repair",
+        repair_node,
     )
 
     builder.add_node(
-        "validation",
-        validation_node,
+        "grouping",
+        grouping_node,
     )
 
     builder.add_node(
-        "retry",
-        retry_node,
+        "patch_and_validation",
+        patch_and_validation_node,
     )
 
     builder.add_node(
@@ -82,33 +53,24 @@ def build_graph(
         "failure_analysis",
     )
 
-    builder.add_conditional_edges(
+    builder.add_edge(
         "failure_analysis",
-        failure_router,
-        {
-            "repair_generation": "repair_generation",
-            END: END,
-        },
+        "repair",
     )
 
     builder.add_edge(
-        "repair_generation",
-        "validation",
-    )
-
-    builder.add_conditional_edges(
-        "validation",
-        validation_router,
-        {
-            "pull_request": "pull_request",
-            "retry": "retry",
-            END: END,
-        },
+        "repair",
+        "grouping",
     )
 
     builder.add_edge(
-        "retry",
-        "repair_generation",
+        "grouping",
+        "patch_and_validation"
+    )
+
+    builder.add_edge(
+        "patch_and_validation",
+        "pull_request",
     )
 
     builder.add_edge(

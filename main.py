@@ -1,8 +1,6 @@
-from http.client import responses
-
 from repair_agent.repair_agent import RepairAgent
 from repair_agent.models.test_document import TestDocument
-from elasticsearch import Elasticsearch
+from elasticsearch import Elasticsearch, helpers
 import asyncio
 from dotenv import load_dotenv
 
@@ -10,61 +8,56 @@ load_dotenv()
 
 async def main():
     es = Elasticsearch("http://host.docker.internal:9200")
-    response = es.get(index="test", id="FuncS1Test#testFunc1_033")
-
-    test_doc = response["_source"]
-
-    print(test_doc)
-    # test_doc = TestDocument(
-    #     {
-            # "testID": "FuncS1Test#testFunc1_033",
-            # "buildID": "15323CC3-5FA2-4DF1-8CFD-CB749844708E",
-            # "repositoryUrl": "https://github.com/Aman1406-gupta/random-project",
-            # "branchName": "HEAD",
-            # "jobName": "Random-Project",
-            # "className": "com.sprinklr.randomproject.funcs.FuncS1Test",
-            # "methodName": "testFunc1_033",
-            # "suiteName": "Suite1",
-            # "status": "FAILED",
-            # "duration_test": 0.003,
-            # "stackTrace": """org.opentest4j.AssertionFailedError: expected: <17> but was: <16>
-            # at app//org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
-            # at app//org.junit.jupiter.api.AssertionFailureBuilder.buildAndThrow(AssertionFailureBuilder.java:132)
-            # at app//org.junit.jupiter.api.AssertEquals.failNotEqual(AssertEquals.java:197)
-            # at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:150)
-            # at app//org.junit.jupiter.api.AssertEquals.assertEquals(AssertEquals.java:145)
-            # at app//org.junit.jupiter.api.Assertions.assertEquals(Assertions.java:531)
-            # at app//com.sprinklr.randomproject.funcs.FuncS1Test.testFunc1_033(FuncS1Test.java:322)
-            # at java.base@21.0.11/java.lang.reflect.Method.invoke(Method.java:580)
-            # at java.base@21.0.11/java.util.ArrayList.forEach(ArrayList.java:1596)
-            # at java.base@21.0.11/java.util.ArrayList.forEach(ArrayList.java:1596)
-            # """,
-            # "errorMessage": "org.opentest4j.AssertionFailedError: expected: <17> but was: <16>",
-            # "timestampExecution": "2026-06-20T19:51:00.852Z",
-            # "testCaseFilePath": "src/test/java/com/sprinklr/randomproject/funcs/FuncS1Test.java",
-            # "moduleName": "root",
-            # "startLine": 317,
-            # "endLine": 323,
-            # "ownershipSource": "GIT_BLAME",
-            # "confidenceScore": 1,
-            # "createdAt": "2026-06-08T13:06:00.000Z",
-            # "lastModifiedAt": "2026-06-08T13:06:00.000Z",
-            # "lastModifiedBy": "Owner Three",
-            # "currentCommitSha": "661762feb994f6ce098e2cbe6ab1f32687c8fff2"
-    #     }
-    # )
+    docs = helpers.scan(
+        es,
+        index="test",
+        query={
+            "query":{
+                "term":{
+                    "status":"FAILED"
+                }
+            }
+        }
+    )
 
     state = {
-        "test_document": test_doc,
+        "test_documents": [
+            TestDocument(
+                testID=hit["_source"]["testID"],
+                buildID=hit["_source"]["buildID"],
+                repositoryUrl=hit["_source"]["repositoryUrl"],
+                branchName=hit["_source"]["branchName"],
+                jobName=hit["_source"]["jobName"],
+                className=hit["_source"]["className"],
+                methodName=hit["_source"]["methodName"],
+                suiteName=hit["_source"]["suiteName"],
+                status=hit["_source"]["status"],
+                duration_test=hit["_source"]["duration_test"],
+                stackTrace=hit["_source"]["stackTrace"],
+                errorMessage=hit["_source"]["errorMessage"],
+                timestampExecution=hit["_source"]["timestampExecution"],
+                testCaseFilePath=hit["_source"]["testCaseFilePath"],
+                moduleName=hit["_source"]["moduleName"],
+                startLine=hit["_source"]["startLine"],
+                endLine=hit["_source"]["endLine"],
+                ownershipSource=hit["_source"]["ownershipSource"],
+                confidenceScore=hit["_source"]["confidenceScore"],
+                createdAt=hit["_source"]["createdAt"],
+                lastModifiedAt=hit["_source"]["lastModifiedAt"],
+                lastModifiedBy=hit["_source"]["lastModifiedBy"],
+                currentCommitSha=hit["_source"]["currentCommitSha"],
+            ) for hit in docs
+        ]
     }
+
+    for test_doc in state["test_documents"]:
+        print(f"Test ID: {test_doc.testID}")
 
     agent = RepairAgent()
 
     result = await agent.ainvoke(state)
 
     print(result)
-
-    asyncio.run(main())
 
 
 if __name__ == "__main__":

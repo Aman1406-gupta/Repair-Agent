@@ -1,17 +1,14 @@
 from repair_agent.graph import build_graph
-
 from repair_agent.task_factory import TaskFactory
-
-from repair_agent.nodes.repository_context import RepositoryContextNode
-from repair_agent.nodes.failure_analysis import FailureAnalysisNode
-from repair_agent.nodes.repair_generation import RepairGenerationNode
-from repair_agent.nodes.validation import ValidationNode
-from repair_agent.nodes.pull_request import PullRequestNode
-
+from repair_agent.nodes.repository_context_node import RepositoryContextNode
+from repair_agent.nodes.failure_analysis_node import FailureAnalysisNode
+from repair_agent.nodes.repair_node import RepairNode
+from repair_agent.nodes.grouping_node import GroupingNode
+from repair_agent.nodes.patch_and_validation_node import PatchAndValidationNode
+from repair_agent.nodes.pull_request_node import PullRequestNode
 from repair_agent.tools.git_tool import GitTool
 from repair_agent.tools.github_tool import GitHubTool
-from repair_agent.tools.github_pr_tool import GitHubPRTool
-from repair_agent.tools.gradle_tool import GradleTool
+from repair_agent.tools.validation_tool import ValidationTool
 from repair_agent.tools.file_tool import FileTool
 
 
@@ -25,9 +22,7 @@ class RepairAgent:
 
         self.github_tool = GitHubTool()
 
-        self.github_pr_tool = GitHubPRTool()
-
-        self.gradle_tool = GradleTool()
+        self.validation_tool = ValidationTool()
 
         self.file_tool = FileTool()
 
@@ -36,18 +31,20 @@ class RepairAgent:
         self.failure_analysis_task = TaskFactory.create_failure_analysis_task(
             tools=[
                 self.github_tool.fetch_file_lines,
-                self.git_tool.get_diff,
             ],
         )
 
         self.repair_task = TaskFactory.create_repair_task(
             tools=[
                 self.file_tool.read_file,
-                self.file_tool.replace_lines,
             ],
         )
 
-        self.pull_request_task = TaskFactory.create_pull_request_task(
+        self.pull_request_task = TaskFactory.pull_request_description_task(
+            tools=[],
+        )
+
+        self.skeleton_pull_request_task = TaskFactory.skeleton_pull_request_description_task(
             tools=[],
         )
 
@@ -60,35 +57,35 @@ class RepairAgent:
 
         failure_analysis = FailureAnalysisNode(
             self.failure_analysis_task,
+        )
+
+        repair_generation = RepairNode(
             self.github_tool,
-        )
-
-        repair_generation = RepairGenerationNode(
             self.repair_task,
-            self.file_tool,
-            self.git_tool,
         )
 
-        validation = ValidationNode(
-            self.gradle_tool,
+        grouping = GroupingNode()
+
+        patch_and_validation = PatchAndValidationNode(
+            self.validation_tool,
+            self.git_tool,
+            self.file_tool,
         )
 
         pull_request = PullRequestNode(
             self.pull_request_task,
             self.git_tool,
-            self.github_pr_tool,
+            self.github_tool,
         )
 
         self.graph = build_graph(
             repository_context,
             failure_analysis,
             repair_generation,
-            validation,
+            grouping,
+            patch_and_validation,
             pull_request,
         )
 
     async def ainvoke(self, state):
         return await self.graph.ainvoke(state)
-
-    # def invoke(self, state):
-    #     return self.graph.invoke(state)

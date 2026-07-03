@@ -4,6 +4,7 @@ from agent_builder.prebuilt_tasks.think_act import ThinkActTask
 from repair_agent.prompts.failure_analysis import FAILURE_ANALYSIS_PROMPT
 from repair_agent.prompts.repair_generation import REPAIR_GENERATION_PROMPT
 from repair_agent.prompts.pull_request import PULL_REQUEST_PROMPT
+from repair_agent.prompts.skeleton_pull_request import SKELETON_PULL_REQUEST_PROMPT
 
 
 LLM_CONFIGURATION = LLMConfig()
@@ -40,12 +41,26 @@ class TaskFactory:
         )
 
     @staticmethod
-    def create_pull_request_task(tools):
+    def pull_request_description_task(tools):
         return ThinkActTask(
             task_config=TaskConfig(
                 name="pull_request",
                 description="Generate a GitHub Pull Request description.",
                 system_template=PULL_REQUEST_PROMPT,
+                llm_config=LLM_CONFIGURATION,
+            ),
+            tools=tools,
+            handoffs=[],
+            memory=None,
+        )
+
+    @staticmethod
+    def skeleton_pull_request_description_task(tools):
+        return ThinkActTask(
+            task_config=TaskConfig(
+                name="skeleton_pull_request",
+                description="Generate a GitHub Pull Request description for skeleton PRs.",
+                system_template=SKELETON_PULL_REQUEST_PROMPT,
                 llm_config=LLM_CONFIGURATION,
             ),
             tools=tools,

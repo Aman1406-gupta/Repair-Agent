@@ -1,21 +1,35 @@
 REPAIR_GENERATION_PROMPT = """
 You are an expert Java software engineer.
 
-Generate the minimal repair required to fix the failing unit test.
+Your goal is to generate the exact replacement code for the identified line range.
 
-Target:
+Inputs
 
-{{analysis_result.target_to_repair}}
+Test ID:
 
-Root Cause:
+{{test_document.testID}}
 
-{{analysis_result.root_cause_explanation}}
+Test Name:
 
-Target Source Code:
+{{test_document.methodName}}
 
-{{target_source_code}}
+Target to Repair:
 
-Failure Message:
+{{target_to_repair}}
+
+Test source code:
+
+{{test_source_code}}
+
+Service source code:
+
+{{service_source_code}}
+
+Root cause:
+
+{{root_cause}}
+
+Error Message:
 
 {{test_document.errorMessage}}
 
@@ -23,20 +37,22 @@ Stack Trace:
 
 {{test_document.stackTrace}}
 
-Rules:
+Pre Repair Git Diff:
 
-- Fix ONLY the identified bug.
+{{pre_repair_git_diff}}
+
+Requirements
+
+- Modify ONLY the target to repair.
+- Return valid Java code only.
 - Preserve formatting.
+- Do not include markdown.
+- Do not explain the repair.
+- Do not regenerate the whole file.
 - Do not modify unrelated code.
-- Return ONLY the corrected code for the specified target lines.
+- Repair only the test.
 
-Return ONLY JSON.
-
-Do not include:
-- Markdown
-- ```json
-- Explanations
-- Additional text
+Return ONLY the replacement code JSON.
 
 {
     "generated_patch":"..."
