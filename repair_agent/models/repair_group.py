@@ -25,5 +25,5 @@ class RepairGroup:
     pr_description: Optional[str] = None
     repair_patches: List[Patch] = None
     is_skeleton_pr: bool = False
-    owner: Optional[str] = None
+    owners: List[str] = field(default_factory=list)
     repository_url: Optional[str] = None

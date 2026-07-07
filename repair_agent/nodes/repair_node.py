@@ -1,3 +1,5 @@
+import json
+
 from repair_agent.state import RepairState
 
 class RepairNode:
@@ -17,27 +19,28 @@ class RepairNode:
             if item.is_infrastructure or not item.is_reproducible or item.target_to_repair == "SERVICE":
                 continue
 
-            service_source = await self.github_tool.fetch_file(
-                {
-                    "repository_url": item.test_document.repositoryUrl,
-                    "file_path": item.service_file_path,
-                    "start_line": item.service_start_line,
-                    "end_line": item.service_end_line,
-                    "ref": item.test_document.currentCommitSha,
-                }
+            service_source = self.github_tool.fetch_file(
+                repository_url= item.test_document.repositoryUrl,
+                file_path= item.service_file_path,
+                ref= item.test_document.currentCommitSha,
             )
 
             item.service_source_code = service_source
 
-            result = await self.repair_task.ainvoke({
-                "test_document": item.test_document,
-                "target_to_repair": item.target_to_repair,
-                "root_cause": item.root_cause,
-                "test_source_code": item.test_source_code,
-                "service_source_code": item.service_source_code,
-                "pre_repair_git_diff": item.pre_repair_git_diff,
-            })
+            result = await self.repair_task.ainvoke(
+                {
+                    "test_document": item.test_document,
+                    "target_to_repair": item.target_to_repair,
+                    "root_cause": item.root_cause,
+                    "test_source_code": item.test_source_code,
+                    "service_source_code": item.service_source_code,
+                    "pre_repair_git_diff": item.pre_repair_git_diff,
+                }
+            )
 
-            item.repair_patch = result["messages"][-1].content
+            response= result["messages"][-1].content
+            patch = json.loads(response)
+
+            item.repair_patch= patch["generated_patch"]
 
         return state

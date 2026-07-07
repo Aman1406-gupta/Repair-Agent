@@ -50,9 +50,6 @@ async def main():
         ]
     }
 
-    for test_doc in state["test_documents"]:
-        print(f"Test ID: {test_doc.testID}")
-
     agent = RepairAgent()
 
     result = await agent.ainvoke(state)

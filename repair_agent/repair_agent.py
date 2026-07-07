@@ -30,7 +30,7 @@ class RepairAgent:
 
         self.failure_analysis_task = TaskFactory.create_failure_analysis_task(
             tools=[
-                self.github_tool.fetch_file_lines,
+                self.github_tool.fetch_file_lines_tool,
             ],
         )
 

@@ -14,9 +14,12 @@ class PatchAndValidationNode:
 
     async def __call__(self, state):
 
-        for group in state["repair_groups"]:
+        for group in state["repair_groups"].values():
 
-            self.git_tool.checkout_branch(group.branch_name)
+            self.git_tool.checkout_branch(
+                repository_url=group.repository_url,
+                branch_name=group.branch_name
+            )
 
             repair_patches: list[Patch] = []
             remove_patches: list[Patch] = []
@@ -28,8 +31,8 @@ class PatchAndValidationNode:
 
                 repair_patch = Patch(
                     methodName= item.test_document.methodName,
-                    start_line= item.test_document.start_line,
-                    end_line= item.test_document.end_line,
+                    start_line= item.test_document.startLine,
+                    end_line= item.test_document.endLine,
                     replacement= item.repair_patch,
                     original= item.test_source_code
                 )
@@ -37,24 +40,23 @@ class PatchAndValidationNode:
                 repair_patches.append(repair_patch)
 
             updated_patches = self.file_tool.replace_lines(
-                {
-                    "file_path": group.group_key,
-                    "repair_patches": repair_patches,
-                }
+                file_path= group.group_key,
+                repair_patches= repair_patches,
             )
 
             failed_validations: list[str] = []
 
-            for item in state["repair_items"]:
+            for item in group.repair_items:
 
-                validation_result = await self.validation_tool.run_test(
-                    {
-                        "class_name": item.test_document.className,
-                        "method_name": item.test_document.methodName
-                    }
+                validation_result = self.validation_tool.run_test(
+                    test_class= item.test_document.className,
+                    test_method= item.test_document.methodName
                 )
 
-                post_repair_git_diff = self.git_tool.post_repair_git_diff.invoke(file_path=item.test_document.testCaseFilePath)
+                post_repair_git_diff = self.git_tool.post_repair_git_diff(
+                    repository_url=group.repository_url,
+                    file_path=item.test_document.testCaseFilePath
+                )
 
                 item.post_repair_git_diff = post_repair_git_diff
 
@@ -64,6 +66,10 @@ class PatchAndValidationNode:
 
                     failed_validations.append(item.test_document.methodName)
 
+                else:
+                    if item.test_document.lastModifiedBy not in group.owners:
+                        group.owners.append(item.test_document.lastModifiedBy)
+
             for updated_patch in updated_patches:
 
                 if updated_patch.methodName in failed_validations:
@@ -72,12 +78,14 @@ class PatchAndValidationNode:
                     print(f"Repair not commited for" + updated_patch.methodName + "due to Validation failure")
 
             self.file_tool.remove_lines(
-                {
-                    "file_path": group.group_key,
-                    "remove_patches": remove_patches
-                }
+                file_path= group.group_key,
+                remove_patches= remove_patches
             )
 
-            self.git_tool.commit_all(group.commit_message, group.group_key)
+            self.git_tool.commit(
+                repository_url=group.repository_url,
+                file_path=group.group_key,
+                commit_message=group.commit_message
+            )
 
         return state

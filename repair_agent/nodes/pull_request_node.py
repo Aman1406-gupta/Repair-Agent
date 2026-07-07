@@ -21,7 +21,7 @@ class PullRequestNode:
 
         pr_urls = []
 
-        for group in state["repair_groups"]:
+        for group in state["repair_groups"].values():
 
             if group.is_skeleton_pr:
 
@@ -46,14 +46,12 @@ class PullRequestNode:
 
                 group.pr_description = pr_desc
 
-                pr_url = await self.github_tool.create_pull_request( # to check
-                    {
-                        "repository_url": group.repository_url,
-                        "source_branch": group.branch_name,
-                        "target_branch": self.git_tool.current_branch.invoke({}), # to check
-                        "title": group.pr_title,
-                        "description": group.pr_description,
-                    }
+                pr_url = self.github_tool.create_pull_request( # to check
+                    repository_url= group.repository_url,
+                    source_branch= group.branch_name,
+                    target_branch= self.git_tool.current_branch(repository_url=group.repository_url), # to check
+                    title= group.pr_title,
+                    description= group.pr_description,
                 )
 
                 pr_urls.append(pr_url)
@@ -83,19 +81,20 @@ class PullRequestNode:
 
                 group.pr_description = pr_desc
 
-                pr_url = await self.github_tool.create_pull_request(
-                    {
-                        "repository_url": group.repository_url,
-                        "source_branch": group.branch_name,
-                        "target_branch": self.git_tool.current_branch.invoke({}), # to check
-                        "title": group.pr_title,
-                        "description": group.pr_description,
-                    }
+                pr_url = self.github_tool.create_pull_request(
+                    repository_url= group.repository_url,
+                    source_branch= group.branch_name,
+                    target_branch= self.git_tool.current_branch(group.repository_url), # to check
+                    title= group.pr_title,
+                    description= group.pr_description,
                 )
 
                 pr_urls.append(pr_url)
 
-            self.git_tool.push_branch.invoke(group.branch_name)
+            self.git_tool.push_branch(
+                repository_url= group.repository_url,
+                branch_name=group.branch_name,
+            )
 
         state["pr_urls"] = pr_urls
 

@@ -44,7 +44,7 @@ class GroupingNode:
                     pr_title=f"AI Repair: {file_name}",
                     repair_items=[],
                     is_skeleton_pr=is_skeleton_pr,
-                    owner=item.test_document.lastModifiedBy,
+                    owners= [],
                     repository_url=item.test_document.repositoryUrl,
                 )
 
