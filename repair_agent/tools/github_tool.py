@@ -98,10 +98,27 @@ class GitHubTool:
             end_line: int,
             ref: str,
     ) -> str:
+        """
+        Fetch specific lines from a GitHub file.
+        """
+
         return self.fetch_file_lines(
             repository_url= repository_url,
             file_path= file_path,
             start_line= start_line,
             end_line= end_line,
+            ref= ref
+        )
+
+    @tool
+    def fetch_file_tool(self, repository_url: str, file_path: str, ref: str) -> str:
+        """
+        Fetch the entire content of a GitHub file. Supports files larger than 1MB
+        by using the raw media type format.
+        """
+
+        return self.fetch_file(
+            repository_url= repository_url,
+            file_path= file_path,
             ref= ref
         )

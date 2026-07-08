@@ -17,11 +17,20 @@ class FailureAnalysisNode:
 
                 response = await self.failure_analysis_task.ainvoke(
                     {
-                        "test_document": item.test_document,
+                        "testID": item.test_document.testID,
+                        "className": item.test_document.className,
+                        "methodName": item.test_document.methodName,
+                        "moduleName": item.test_document.moduleName,
+                        "repositoryUrl": item.test_document.repositoryUrl,
+                        "ref": item.test_document.currentCommitSha,
                         "test_source_code": item.test_source_code,
                         "pre_repair_git_diff": item.pre_repair_git_diff,
+                        "errorMessage": item.test_document.errorMessage,
+                        "stackTrace": item.test_document.stackTrace,
                     }
                 )
+
+                print(response)
 
                 analysis = json.loads(response.content)
 
@@ -54,5 +63,9 @@ class FailureAnalysisNode:
             except Exception as e:
 
                 item.error = str(e)
+
+            break
+
+        print("Failure analysis node completed")
 
         return state

@@ -46,15 +46,12 @@ class PullRequestNode:
 
                 group.pr_description = pr_desc
 
-                pr_url = self.github_tool.create_pull_request( # to check
-                    repository_url= group.repository_url,
-                    source_branch= group.branch_name,
-                    target_branch= self.git_tool.current_branch(repository_url=group.repository_url), # to check
-                    title= group.pr_title,
-                    description= group.pr_description,
-                )
-
-                pr_urls.append(pr_url)
+                if group.owners:
+                    reviewers = "\n".join(f"-@{owner}" for owner in group.owners)
+                    group.pr_description += (
+                        "\n\n## Suggested Reviewers\n"
+                        f"{reviewers}"
+                    )
 
             if not group.is_skeleton_pr:
 
@@ -81,21 +78,23 @@ class PullRequestNode:
 
                 group.pr_description = pr_desc
 
-                pr_url = self.github_tool.create_pull_request(
-                    repository_url= group.repository_url,
-                    source_branch= group.branch_name,
-                    target_branch= self.git_tool.current_branch(group.repository_url), # to check
-                    title= group.pr_title,
-                    description= group.pr_description,
-                )
-
-                pr_urls.append(pr_url)
-
             self.git_tool.push_branch(
                 repository_url= group.repository_url,
                 branch_name=group.branch_name,
             )
 
+            pr_url = self.github_tool.create_pull_request(
+                repository_url= group.repository_url,
+                source_branch= group.branch_name,
+                target_branch= self.git_tool.current_branch(group.repository_url),
+                title= group.pr_title,
+                description= group.pr_description,
+            )
+
+            pr_urls.append(pr_url)
+
         state["pr_urls"] = pr_urls
+
+        print("Pull request")
 
         return state

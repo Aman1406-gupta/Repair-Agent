@@ -88,4 +88,6 @@ class PatchAndValidationNode:
                 commit_message=group.commit_message
             )
 
+        print("Patch and Validation node completed")
+
         return state

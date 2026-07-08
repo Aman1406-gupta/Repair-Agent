@@ -29,18 +29,28 @@ class RepairNode:
 
             result = await self.repair_task.ainvoke(
                 {
-                    "test_document": item.test_document,
+                    "testID": item.test_document.testID,
+                    "methodName": item.test_document.methodName,
                     "target_to_repair": item.target_to_repair,
                     "root_cause": item.root_cause,
                     "test_source_code": item.test_source_code,
                     "service_source_code": item.service_source_code,
                     "pre_repair_git_diff": item.pre_repair_git_diff,
+                    "errorMessage": item.test_document.errorMessage,
+                    "stackTrace": item.test_document.stackTrace,
                 }
             )
 
+            print(result)
+
             response= result["messages"][-1].content
+
+            print(response)
+
             patch = json.loads(response)
 
             item.repair_patch= patch["generated_patch"]
+
+        print("Repair node completed")
 
         return state

@@ -52,4 +52,6 @@ class GroupingNode:
 
         state["repair_groups"] = groups
 
+        print("Grouping node completed")
+
         return state

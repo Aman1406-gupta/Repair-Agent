@@ -1,5 +1,10 @@
 import subprocess
 
+from langchain_core.tools import tool
+
+from storage.utils.mongo_topology import tool_requests_to_metadata
+
+
 class ValidationTool:
     """Wrapper around Gradle test execution."""
 
@@ -28,4 +33,18 @@ class ValidationTool:
             "test",
             "--tests",
             target,
+        )
+
+    @tool
+    def run_test_tool(self, test_class: str, test_method: str) -> bool:
+        """
+        Execute a single test method.
+
+        Example:
+        UserServiceTest.testCreateUser
+        """
+
+        return self.run_test(
+            test_class= test_class,
+            test_method= test_method,
         )

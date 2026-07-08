@@ -7,11 +7,11 @@ Inputs
 
 Test ID:
 
-{{test_document.testID}}
+{{testID}}
 
 Test Name:
 
-{{test_document.methodName}}
+{{methodName}}
 
 Target to Repair:
 
@@ -31,11 +31,11 @@ Root cause:
 
 Error Message:
 
-{{test_document.errorMessage}}
+{{errorMessage}}
 
 Stack Trace:
 
-{{test_document.stackTrace}}
+{{stackTrace}}
 
 Pre Repair Git Diff:
 
