@@ -109,3 +109,15 @@ class FileTool:
             "\n".join(lines) + "\n",
             encoding="utf-8",
             )
+
+    def as_langchain_tools(self):
+        file_tool = self
+
+        @tool
+        def read_file(self, file_path: str) -> str:
+            """
+            Read an entire file.
+            """
+            return Path(file_path).read_text(encoding="utf-8")
+
+        return [read_file]

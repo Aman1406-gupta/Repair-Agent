@@ -35,16 +35,15 @@ class ValidationTool:
             target,
         )
 
-    @tool
-    def run_test_tool(self, test_class: str, test_method: str) -> bool:
-        """
-        Execute a single test method.
+    def as_langchain_tools(self):
+        validation_tool = self
 
-        Example:
-        UserServiceTest.testCreateUser
-        """
+        @tool
+        def run_test_tool(test_class: str, test_method: str) -> bool:
+            """Execute a single Gradle test method."""
+            return validation_tool.run_test(
+                test_class=test_class,
+                test_method=test_method,
+            )
 
-        return self.run_test(
-            test_class= test_class,
-            test_method= test_method,
-        )
+        return [run_test_tool]

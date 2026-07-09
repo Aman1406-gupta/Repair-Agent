@@ -29,7 +29,6 @@ class RepositoryContextNode:
                     repository_url=repo,
                     commit_sha=current_commit,
                 )
-                print("Checkout commit Done")
                 checkout_cache.add(checkout_key)
 
             cache_key = (repo, current_commit, file_path)

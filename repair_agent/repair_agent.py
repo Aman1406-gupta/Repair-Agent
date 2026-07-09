@@ -30,15 +30,14 @@ class RepairAgent:
 
         self.failure_analysis_task = TaskFactory.create_failure_analysis_task(
             tools=[
-                self.github_tool.fetch_file_lines_tool,
-                self.github_tool.fetch_file_tool,
-                self.validation_tool.run_test_tool,
+                *self.github_tool.as_langchain_tools(),
+                *self.validation_tool.as_langchain_tools(),
             ],
         )
 
         self.repair_task = TaskFactory.create_repair_task(
             tools=[
-                self.file_tool.read_file,
+                *self.file_tool.as_langchain_tools(),
             ],
         )
 

@@ -89,36 +89,33 @@ class GitHubTool:
         response.raise_for_status()
         return response.json()["html_url"]
 
-    @tool
-    def fetch_file_lines_tool(
-            self,
-            repository_url: str,
-            file_path: str,
-            start_line: int,
-            end_line: int,
-            ref: str,
-    ) -> str:
-        """
-        Fetch specific lines from a GitHub file.
-        """
+    def as_langchain_tools(self):
+        github_tool = self
 
-        return self.fetch_file_lines(
-            repository_url= repository_url,
-            file_path= file_path,
-            start_line= start_line,
-            end_line= end_line,
-            ref= ref
-        )
+        @tool
+        def fetch_file_lines_tool(
+                repository_url: str,
+                file_path: str,
+                start_line: int,
+                end_line: int,
+                ref: str,
+        ) -> str:
+            """Fetch specific lines from a GitHub file."""
+            return github_tool.fetch_file_lines(
+                repository_url=repository_url,
+                file_path=file_path,
+                start_line=start_line,
+                end_line=end_line,
+                ref=ref,
+            )
 
-    @tool
-    def fetch_file_tool(self, repository_url: str, file_path: str, ref: str) -> str:
-        """
-        Fetch the entire content of a GitHub file. Supports files larger than 1MB
-        by using the raw media type format.
-        """
+        @tool
+        def fetch_file_tool(repository_url: str, file_path: str, ref: str) -> str:
+            """Fetch the entire content of a GitHub file."""
+            return github_tool.fetch_file(
+                repository_url=repository_url,
+                file_path=file_path,
+                ref=ref,
+            )
 
-        return self.fetch_file(
-            repository_url= repository_url,
-            file_path= file_path,
-            ref= ref
-        )
+        return [fetch_file_lines_tool, fetch_file_tool]

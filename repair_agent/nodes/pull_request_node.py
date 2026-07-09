@@ -95,6 +95,6 @@ class PullRequestNode:
 
         state["pr_urls"] = pr_urls
 
-        print("Pull request")
+        print("Pull request node completed")
 
         return state

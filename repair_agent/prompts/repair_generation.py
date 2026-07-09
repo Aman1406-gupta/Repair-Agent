@@ -21,10 +21,6 @@ Test source code:
 
 {{test_source_code}}
 
-Service source code:
-
-{{service_source_code}}
-
 Root cause:
 
 {{root_cause}}
